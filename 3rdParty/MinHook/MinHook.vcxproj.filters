@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Files\src">
+      <UniqueIdentifier>{e274556e-56f1-4989-8da5-aba4ba49606b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Files\include">
+      <UniqueIdentifier>{f3620e84-b542-4399-8602-06c2c25b3386}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\buffer.c">
+      <Filter>Files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hook.c">
+      <Filter>Files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\trampoline.c">
+      <Filter>Files\src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\hde32.c">
+      <Filter>Files\src</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\buffer.h">
+      <Filter>Files\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\pstdint.h">
+      <Filter>Files\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\trampoline.h">
+      <Filter>Files\src</Filter>
+    </ClInclude>
+    <ClInclude Include="include\MinHook.h">
+      <Filter>Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="src\hde32.h">
+      <Filter>Files\src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\table32.h">
+      <Filter>Files\src</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
