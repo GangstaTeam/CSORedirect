@@ -25,10 +25,22 @@ int gFileCount = 0;
 
 void log(const char* format, ...) {
     va_list args;
+    
+    // Write to console
     va_start(args, format);
     vprintf(format, args);
     va_end(args);
     std::cout << std::endl;
+    
+    // Write to log file
+    FILE* logFile = fopen("CSORedirect.log", "a");
+    if (logFile) {
+        va_start(args, format);
+        vfprintf(logFile, format, args);
+        va_end(args);
+        fprintf(logFile, "\n");
+        fclose(logFile);
+    }
 }
 
 template <typename H, typename O = void*>
@@ -50,9 +62,10 @@ OriginalScriptLoadCompiled_t OriginalScriptLoadCompiled;
 
 char __cdecl ScriptLoadCompiled(char* scriptPath, char *a2, char *Str2, int a4, int a5)
 {
-    log("Hook::ScriptLoadCompiled %s\n", scriptPath);
+    log("Hook::ScriptLoadCompiled - Path: %s", scriptPath);
 
     if (!gIgnoreFiles || gFileCount == 0) {
+        log("  -> No redirect list loaded, calling original function");
         return reinterpret_cast<char(__cdecl*)(char*, char*, char*, int, int)>(OriginalScriptLoadCompiled)(scriptPath, a2, Str2, a4, a5);
     }
 
@@ -95,6 +108,7 @@ char __cdecl ScriptLoadCompiled(char* scriptPath, char *a2, char *Str2, int a4, 
         }
     }
 
+    log("  -> Script not in redirect list, calling original function");
     return reinterpret_cast<char(__cdecl*)(char*, char*, char*, int, int)>(OriginalScriptLoadCompiled)(scriptPath, a2, Str2, a4, a5);
 }
 
@@ -102,7 +116,7 @@ bool __cdecl Echo(void*, int _arg_count, char** arg_text)
 {
     int arg_count = _arg_count - 1;
 
-    printf("[Echo (%d)] %s: %s\n", arg_count - 1, arg_text[1], arg_text[2]);
+    log("[Echo (%d)] %s: %s", arg_count - 1, arg_text[1], arg_text[2]);
 
     return false;
 }
@@ -112,8 +126,12 @@ RegisterMethod_t oRegisterMethod;
 
 void* __fastcall HookedRegisterMethod(void* _this, void*, const char* a2, const char* a3, void* a4, int a5, int a6, int a7)
 {
-    if (strcmp(a3, "Echo") == 0)    
-        a4 = (void*)Echo;    
+    log("Hook::RegisterMethod - Namespace: %s, Method: %s", a2 ? a2 : "NULL", a3 ? a3 : "NULL");
+    
+    if (strcmp(a3, "Echo") == 0) {
+        log("  -> Redirecting Echo to custom implementation");
+        a4 = (void*)Echo;
+    }
 
     return oRegisterMethod(_this, a2, a3, a4, a5, a6, a7);
 }
@@ -122,6 +140,7 @@ bool LoadList()
 {
     FILE* pFileList = fopen("plugins\\CSORedirect.list", "r");
     if (!pFileList) {
+        log("  plugins\\CSORedirect.list file not found.");
         return false;
     }
 
@@ -149,6 +168,7 @@ bool LoadList()
             return false;
         }
         strcpy(gIgnoreFiles[gFileCount], filePath);
+        log("  Loaded redirect file: %s", gIgnoreFiles[gFileCount]);
 
         gFileCount++;
     }
@@ -173,7 +193,7 @@ DWORD WINAPI TestThread(LPVOID param) {
     AttachConsole(GetCurrentProcessId());
     freopen("CON", "w", stdout);
     freopen("CON", "w", stderr);
-    printf("TestThread 2\n");
+
     while (true) {
         if (GetAsyncKeyState(VK_F1) & 0x8000) {
 
@@ -240,15 +260,10 @@ int __stdcall DllMain(HMODULE p_hModule, DWORD p_dwReason, void* p_pReserved)
         MH_CreateHook(0x00491760, &HookedRegisterMethod, &oRegisterMethod);
         MH_CreateHook(0x0047FFE0, ScriptLoadCompiled, &OriginalScriptLoadCompiled);
 
-        printf("TestThread 1\n");
-        // Create remote thread
-
         HANDLE hThread = CreateThread(NULL, 0, TestThread, NULL, 0, NULL);
         if (hThread) {
             CloseHandle(hThread);
-        }
-        printf("TestThread 3\n");
-    
+        }    
     }
 
     if(p_dwReason == DLL_PROCESS_DETACH)
