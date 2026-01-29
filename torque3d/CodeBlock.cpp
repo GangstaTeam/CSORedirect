@@ -2,7 +2,9 @@
 
 using namespace torque3d;
 
-CodeBlock** smCodeBlockList = (CodeBlock**)0x0081518C;
+namespace torque3d {
+    CodeBlock** smCodeBlockList = (CodeBlock**)0x0081518C;
+}
 
 torque3d::CodeBlock::CodeBlock()
 {
